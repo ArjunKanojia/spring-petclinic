@@ -71,3 +71,10 @@ VALUES
 (2, 8, '2011-03-04', 'rabies shot'),
 (3, 8, '2009-06-04', 'neutered'),
 (4, 7, '2008-09-04', 'spayed');
+
+INSERT INTO feature_flags (name, type, configuration, enabled_by_default)
+VALUES
+  ('add_new_pet',  'BOOLEAN', 'true', 1),
+  ('add_visit',    'BOOLEAN', 'true', 1),
+  ('owner_search', 'BOOLEAN', 'true', 1);
+
