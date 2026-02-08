@@ -8,6 +8,12 @@
     <th:block th:if="${visit['new']}" th:text="#{new}">New </th:block>
     Visit
   </h2>
+  
+  
+  <div th:if="${message}" class="alert alert-info" role="alert">
+    <span th:text="${message}"></span>
+</div>
+  
 
   <b th:text="#{pet}">Pet</b>
   <table class="table table-striped">

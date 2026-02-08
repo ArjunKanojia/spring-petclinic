@@ -18,6 +18,8 @@ package org.springframework.samples.petclinic.owner;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.samples.petclinic.featureflag.dto.EvaluationContext;
+import org.springframework.samples.petclinic.featureflag.service.FeatureFlagEvaluator;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -42,9 +44,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 class VisitController {
 
 	private final OwnerRepository owners;
+	
+	private final FeatureFlagEvaluator featureFlagEvaluator;
 
-	public VisitController(OwnerRepository owners) {
+	public VisitController(OwnerRepository owners,FeatureFlagEvaluator featureFlagEvaluator) {
 		this.owners = owners;
+		this.featureFlagEvaluator=featureFlagEvaluator;
 	}
 
 	@InitBinder
@@ -91,6 +96,24 @@ class VisitController {
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
 	public String processNewVisitForm(@ModelAttribute Owner owner, @PathVariable int petId, @Valid Visit visit,
 			BindingResult result, RedirectAttributes redirectAttributes) {
+		
+		
+		EvaluationContext context = null;
+	    if (owner != null && owner.getId() != null) {
+	        context = new EvaluationContext("owner-" + owner.getId());
+	    }
+
+		
+		
+		// FEATURE FLAG CHECK – safe, no ID dependency needed
+	    if (!featureFlagEvaluator.isEnabled("add_visit", context)) {
+	    	
+	    	
+	        redirectAttributes.addFlashAttribute("message",
+	            "Adding new visits is currently disabled. Please try again later.");
+	        return "redirect:/owners/" + owner.getId() + "/pets/" + petId + "/visits/new";
+	    }
+	    
 		if (result.hasErrors()) {
 			return "pets/createOrUpdateVisitForm";
 		}

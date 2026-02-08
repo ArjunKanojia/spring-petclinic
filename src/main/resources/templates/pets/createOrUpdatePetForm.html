@@ -8,7 +8,18 @@
     <th:block th:if="${pet['new']}" th:text="#{new}">New </th:block>
     <span th:text="#{pet}">Pet</span>
   </h2>
+  
+  <div th:if="${message}" class="alert alert-info">
+    <span th:text="${message}"></span>
+</div>
   <form th:object="${pet}" class="form-horizontal" method="post">
+	  
+	  <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+  <ul>
+    <li th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></li>
+  </ul>
+</div>
+	  
     <input type="hidden" name="id" th:value="*{id}" />
     <div class="form-group has-feedback">
       <div class="form-group">

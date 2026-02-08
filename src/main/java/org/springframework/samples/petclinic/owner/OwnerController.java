@@ -22,6 +22,9 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.featureflag.annotation.FeatureToggle;
+import org.springframework.samples.petclinic.featureflag.dto.EvaluationContext;
+import org.springframework.samples.petclinic.featureflag.service.FeatureFlagEvaluator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -33,10 +36,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
-
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * @author Juergen Hoeller
@@ -51,9 +53,12 @@ class OwnerController {
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
 	private final OwnerRepository owners;
+	
+	private final FeatureFlagEvaluator featureFlagEvaluator;
 
-	public OwnerController(OwnerRepository owners) {
+	public OwnerController(OwnerRepository owners,FeatureFlagEvaluator featureFlagEvaluator) {
 		this.owners = owners;
+		this.featureFlagEvaluator= featureFlagEvaluator;
 	}
 
 	@InitBinder
@@ -92,30 +97,35 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners")
-	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
-			Model model) {
-		// allow parameterless GET request for /owners to return all records
-		String lastName = owner.getLastName();
-		if (lastName == null) {
-			lastName = ""; // empty string signifies broadest possible search
-		}
+	@FeatureToggle(value = "owner_search", fallbackEnabled = false)
+	public String processFindForm(
+	        @RequestParam(defaultValue = "1") int page,
+	        Owner owner,
+	        BindingResult result,
+	        Model model) {
 
-		// find owners by last name
-		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, lastName);
-		if (ownersResults.isEmpty()) {
-			// no owners found
-			result.rejectValue("lastName", "notFound", "not found");
-			return "owners/findOwners";
-		}
+	   
+	    String lastName = owner.getLastName();
+	    if (lastName == null) {
+	        lastName = ""; // empty string signifies broadest possible search
+	    }
 
-		if (ownersResults.getTotalElements() == 1) {
-			// 1 owner found
-			owner = ownersResults.iterator().next();
-			return "redirect:/owners/" + owner.getId();
-		}
+	    Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, lastName);
 
-		// multiple owners found
-		return addPaginationModel(page, model, ownersResults);
+	    if (ownersResults.isEmpty()) {
+	        // no owners found
+	        result.rejectValue("lastName", "notFound", "not found");
+	        return "owners/findOwners";
+	    }
+
+	    if (ownersResults.getTotalElements() == 1) {
+	        // 1 owner found
+	        owner = ownersResults.iterator().next();
+	        return "redirect:/owners/" + owner.getId();
+	    }
+
+	    // multiple owners found
+	    return addPaginationModel(page, model, ownersResults);
 	}
 
 	private String addPaginationModel(int page, Model model, Page<Owner> paginated) {
