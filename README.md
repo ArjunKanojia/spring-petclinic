@@ -133,19 +133,10 @@ https://www.postman.com/altimetry-geologist-78699286/java-assesment/collection/1
 
 Example Feature Flag Flow
 
-Step 1: Create Flags for All Features (One-Time Setup)
 
-Initially, no feature flags exist in the database. All features work normally due to safe defaults.
+Initially, Boolean  flags exist in the database. All features work normally due to safe defaults.
 
-Create flags using Postman:
-
-Flag → add_new_pet → BOOLEAN → POST – Create / Enable
-Flag → add_visit → BOOLEAN → POST – Create / Enable
-Flag → owner_search → BOOLEAN → POST – Create / Enable
-
-Flags are now persisted and enabled.
-
-Step 2: Disable Any Feature at Runtime
+Step 1: Disable Any Feature at Runtime
 
 Example: Disable add_new_pet
 
@@ -155,7 +146,7 @@ Try adding a new pet in the browser.
 
 Result: Feature is blocked.
 
-Step 3: Re-Enable Feature Instantly
+Step 2: Re-Enable Feature Instantly
 
 Flag → add_new_pet → BOOLEAN → PUT – Enable (true)
 
@@ -163,7 +154,7 @@ Refresh browser and try again.
 
 Result: Pet is added successfully.
 
-Step 4: Apply Same Flow to Other Features
+Step 3: Apply Same Flow to Other Features
 
 Repeat the same steps for:
 
