@@ -72,7 +72,7 @@ VALUES
 (3, 8, '2009-06-04', 'neutered'),
 (4, 7, '2008-09-04', 'spayed');
 
-INSERT INTO feature_flags (name, type, configuration, enabled_by_default)
+INSERT IGNORE INTO feature_flags (name, type, configuration, enabled_by_default)
 VALUES
   ('add_new_pet',  'BOOLEAN', 'true', 1),
   ('add_visit',    'BOOLEAN', 'true', 1),
